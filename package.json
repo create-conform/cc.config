@@ -1,0 +1,15 @@
+{
+  "name": "cc.io.volume.config",
+  "version": "0.1.1",
+  "title": "IO Configuration Volume Module",
+  "description": "Module that will mount a local volume for storing configuration.",
+  "license": "Apache-2.0",
+  "main": "config.js",
+  "pkxDependencies": [
+    { "package" : "cc.io.file-system.0.1", "optional" : true},
+    { "package" : "cc.io.local-storage.0.1", "optional" : true},
+    "cc.io.0.1",
+    "cc.host.0.1",
+    "cc.event.0.1"
+  ]
+}
