@@ -1,6 +1,6 @@
 {
   "name": "cc.io.volume.config",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "title": "IO Configuration Volume Module",
   "description": "Module that will mount a local volume for storing configuration.",
   "license": "Apache-2.0",

@@ -81,7 +81,7 @@ function Config(pkx, module, configuration) {
                     path = PATH_CONFIG_USER_MACOS;
                     break;
                 case host.PLATFORM_WINDOWS:
-                    path = PATH_CONFIG_USER_WINDOWS;
+                    path = "/" + PATH_CONFIG_USER_WINDOWS;
                     break;
             }
             if (host.isPlatformLinuxFamily()) {
