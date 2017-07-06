@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////////
 //
-// cc.io.volume.config
+// cc.config
 //
-//    Module that will mount a local volume for storing configuration.
+//    Library for loading and saving configuration data.
 //
 // License
 //    Apache License Version 2.0
@@ -30,9 +30,14 @@ function Config(pkx, module, configuration) {
     var PATH_CONFIG_USER_LINUX = typeof process != "undefined"? process.env.HOME + "/.config/" : null;
     var PATH_CONFIG_USER_WINDOWS = typeof process != "undefined"? process.env.APPDATA + "\\" : null;
     var PATH_CONFIG_USER_MACOS = typeof process != "undefined"? process.env.HOME + "/Library/Preferences/" : null;
+    this.ERROR_FILE_SIZE_EXEEDS_LIMIT = "config-error-file-size-exeeds-limit";
     this.MAX_SIZE = ls? ls.MAX_SIZE : "5242880";
 
-    this.ConfigurationVolume = function(mod, root) {
+    //
+    // private
+    //
+    var volume;
+    var ConfigurationVolume = function(mod, root) {
         this.err = [];
         this.name = "Configuration (Local)";
         this.protocol = PROTOCOL_CONFIGURATION;
@@ -45,60 +50,108 @@ function Config(pkx, module, configuration) {
         this.readOnly = false;
         this.localId = "config";
 
-        this.open = function(path, opt_access) {
-            return mod.uri.open(root + path, opt_access);
+        this.open = function(path, opt_access, create_path) {
+            return mod.uri.open(root + path, opt_access, create_path);
         };
 
         this.events = new event.Emitter(this);
     };
-    this.ConfigurationVolume.prototype = io.Volume;
-
-    var volume;
-
-    define.wait(function(resolve, reject) {
-        function tryLocalStorage() {
-            // secondly try local storage
-            if (!volume && ls) {
-                volume = new self.ConfigurationVolume(ls, "ls:///");
-                done();
-                return;
-            }
-        }
-        function done() {
-            if (volume) {
-                io.volumes.register(volume);
-                resolve();
-                return;
-            }
-            reject("The runtime does not support saving persistent configuration.");
-        }
-
-        // first try file system
-        if (fs) {
-            var path;
-            switch(host.platform) {
-                case host.PLATFORM_MACOS:
-                    path = PATH_CONFIG_USER_MACOS;
-                    break;
-                case host.PLATFORM_WINDOWS:
-                    path = "/" + PATH_CONFIG_USER_WINDOWS;
-                    break;
-            }
-            if (host.isPlatformLinuxFamily()) {
-                path = PATH_CONFIG_USER_LINUX;
-            }
-            fs.uri.exists(path).then(function() {
-                volume = new self.ConfigurationVolume(fs, path);
-                done();
-            }, function(e) {
-                console.error("Configuration volume path not accessible!", e);
-                tryLocalStorage();
+    ConfigurationVolume.prototype = io.Volume;
+    function mountConfigVolume(resolve, reject) {
+        //mount config volume if not already mounted
+        if (!volume) {
+            tryFileSystem().then(resolve, function() {
+                if (e) {
+                    reject(new Error(e));
+                }
+                tryLocalStorage().then(resolve, function(e) {
+                    reject(new Error(e || "The runtime does not support saving local configuration."));
+                })
             });
         }
         else {
-            tryLocalStorage();
+            resolve();
         }
-    });
+    }
+    function tryFileSystem() {
+        return new Promise(function(resolve, reject) {
+            // firstly try file system
+            if (fs && fs.uri) {
+                var path;
+                switch(host.platform) {
+                    case host.PLATFORM_MACOS:
+                        path = PATH_CONFIG_USER_MACOS;
+                        break;
+                    case host.PLATFORM_WINDOWS:
+                        path = "/" + PATH_CONFIG_USER_WINDOWS;
+                        break;
+                }
+                if (host.isPlatformLinuxFamily()) {
+                    path = PATH_CONFIG_USER_LINUX;
+                }
+                fs.uri.exists(path).then(function() {
+                    volume = new ConfigurationVolume(fs, path);
+                    resolve();
+                }, function(e) {
+                    reject(e);
+                });
+            }
+            else {
+                reject();
+            }
+        });
+    }
+    function tryLocalStorage() {
+        return new Promise(function(resolve, reject) {
+            // secondly try local storage
+            if (ls && ls.uri) {
+                volume = new ConfigurationVolume(ls, "ls:///");
+                resolve();
+            }
+            else {
+                reject(new Error("The runtime does not support saving local configuraration"));
+            }
+        });
+    }
+
+    //
+    // public
+    //
+    this.load = function(path) {
+        return new Promise(function(resolve, reject) {
+            function success() {
+                // load file from volume (if not exist, return blanco object)
+                volume.open(path, io.ACCESS_READ, true).then(function(stream) {
+                    stream.readAsJSON().then(resolve, reject);
+                }, reject);
+            }
+
+            if (!volume) {
+                mountConfigVolume(success, reject);
+            }
+        });
+    };
+
+    this.save = function(obj, path) {
+        return new Promise(function(resolve, reject) {
+            function success() {
+                // save file to volume (and create folders)
+                volume.open(path, io.ACCESS_MODIFY, true).then(function(stream) {
+                    var data = JSON.stringify(obj);
+                    if (data.length > self.MAX_SIZE) {
+                        reject(new Error(self.ERROR_FILE_SIZE_EXEEDS_LIMIT, "The configuration file is too big. There is a size limit of " + self.MAX_SIZE + " bytes per file for storing local configuration data."));
+                    }
+                    else {
+                        stream.write(data).then(resolve, reject);
+                    }
+                }, reject);
+            }
+
+            if (!volume) {
+                mountConfigVolume(success, reject);
+            }
+        });
+    };
 }
 
 var singleton;
@@ -108,6 +161,3 @@ define(function() {
     }
     return singleton;
 });
-
-// create instance on define
-define.cache.get().factory();
