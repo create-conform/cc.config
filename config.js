@@ -31,7 +31,7 @@ function Config(pkx, module, configuration) {
     var PATH_CONFIG_USER_WINDOWS = typeof process != "undefined"? process.env.APPDATA + "\\" : null;
     var PATH_CONFIG_USER_MACOS = typeof process != "undefined"? process.env.HOME + "/Library/Preferences/" : null;
     this.ERROR_FILE_SIZE_EXEEDS_LIMIT = "config-error-file-size-exeeds-limit";
-    this.MAX_SIZE = ls? ls.MAX_SIZE : "5242880";
+    this.MAX_SIZE = ls && ls.MAX_SIZE? ls.MAX_SIZE : "5242880";
 
     //
     // private
@@ -162,7 +162,10 @@ function Config(pkx, module, configuration) {
                 }, reject);
             }
 
-            if (!volume) {
+            if (!path) {
+                reject(new Error(self.ERROR_INVALID_PATH, "There is no path specified to save the config."));
+            }
+            else if (!volume) {
                 mountConfigVolume(success, reject);
             }
             else {
