@@ -135,6 +135,9 @@ function Config(pkx, module, configuration) {
             if (!volume) {
                 mountConfigVolume(success, reject);
             }
+            else {
+                success();
+            }
         });
     };
 
@@ -161,6 +164,9 @@ function Config(pkx, module, configuration) {
 
             if (!volume) {
                 mountConfigVolume(success, reject);
+            }
+            else {
+                success();
             }
         });
     };
