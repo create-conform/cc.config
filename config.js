@@ -122,7 +122,13 @@ function Config(pkx, module, configuration) {
             function success() {
                 // load file from volume (if not exist, return blanco object)
                 volume.open(path, io.ACCESS_READ, true).then(function(stream) {
-                    stream.readAsJSON().then(resolve, reject);
+                    stream.readAsJSON().then(function(obj) {
+                        stream.close();
+                        resolve(obj);
+                    }, function(e) {
+                        stream.close();
+                        reject(e);
+                    });
                 }, reject);
             }
 
@@ -142,7 +148,13 @@ function Config(pkx, module, configuration) {
                         reject(new Error(self.ERROR_FILE_SIZE_EXEEDS_LIMIT, "The configuration file is too big. There is a size limit of " + self.MAX_SIZE + " bytes per file for storing local configuration data."));
                     }
                     else {
-                        stream.write(data).then(resolve, reject);
+                        stream.write(data).then(function() {
+                            stream.close();
+                            resolve();
+                        }, function(e) {
+                            stream.close();
+                            reject(e);
+                        });
                     }
                 }, reject);
             }
