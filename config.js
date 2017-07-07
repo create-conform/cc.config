@@ -145,7 +145,7 @@ function Config(pkx, module, configuration) {
         return new Promise(function(resolve, reject) {
             function success() {
                 // save file to volume (and create folders)
-                volume.open(path, io.ACCESS_MODIFY, true).then(function(stream) {
+                volume.open(path, io.ACCESS_OVERWRITE, true).then(function(stream) {
                     var data = JSON.stringify(obj);
                     if (data.length > self.MAX_SIZE) {
                         reject(new Error(self.ERROR_FILE_SIZE_EXEEDS_LIMIT, "The configuration file is too big. There is a size limit of " + self.MAX_SIZE + " bytes per file for storing local configuration data."));
