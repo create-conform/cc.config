@@ -60,7 +60,7 @@ function Config(pkx, module, configuration) {
     function mountConfigVolume(resolve, reject) {
         //mount config volume if not already mounted
         if (!volume) {
-            tryFileSystem().then(resolve, function() {
+            tryFileSystem().then(resolve, function(e) {
                 if (e) {
                     reject(new Error(e));
                 }
