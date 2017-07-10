@@ -1,6 +1,6 @@
 {
   "name": "cc.config",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "title": "Configuration Module",
   "description": "Library for loading and saving configuration data.",
   "license": "Apache-2.0",

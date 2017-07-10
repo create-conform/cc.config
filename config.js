@@ -58,6 +58,10 @@ function Config(pkx, module, configuration) {
             return mod.uri.open(root + (path.indexOf("/") == 0? path.substr(1) : path), opt_access, create_path);
         };
 
+        this.exists = function(path) {
+            return mod.uri.exists(root + (path.indexOf("/") == 0? path.substr(1) : path));
+        };
+
         this.query = function() {
             //TODO
             // UNFINISHED
