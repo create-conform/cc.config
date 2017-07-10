@@ -64,13 +64,8 @@ function Config(pkx, module, configuration) {
             return mod.uri.exists(root + (path.indexOf("/") == 0? path.substr(1) : path));
         };
 
-        this.query = function() {
-            //TODO
-            // UNFINISHED
-            //return mod.uri.query(root + (path.indexOf("/") == 0? path.substr(1) : path));
-            return new Promise(function(resolve, reject) {
-                resolve([]);
-            });
+        this.query = function(path) {
+            return mod.uri.query(root + (path.indexOf("/") == 0? path.substr(1) : path));
         };
 
         this.events = new event.Emitter(this);
