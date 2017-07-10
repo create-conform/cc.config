@@ -192,19 +192,20 @@ function Config(pkx, module, configuration) {
     };
 
     this.getVolume = function() {
-        return new Promise(function(resolve, reject) {
-            function success() {
-                resolve(volume);
-            }
-
-            if (!volume) {
-                mountConfigVolume(success, reject);
-            }
-            else {
-                success();
-            }
-        });
-    };
+            //return volume;
+            return new Promise(function(resolve, reject) {
+                function success() {
+                    resolve(volume);
+                }
+    
+                if (!volume) {
+                    mountConfigVolume(success, reject);
+                }
+                else {
+                    success();
+                }
+            });
+        };
 }
 
 var singleton;
