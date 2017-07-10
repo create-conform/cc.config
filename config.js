@@ -50,8 +50,21 @@ function Config(pkx, module, configuration) {
         this.readOnly = false;
         this.localId = "config";
 
+        this.getURI = function(path) {
+            return mod.uri.parse(root + (path.indexOf("/") == 0? path.substr(1) : path));
+        }
+
         this.open = function(path, opt_access, create_path) {
-            return mod.uri.open(root + path, opt_access, create_path);
+            return mod.uri.open(root + (path.indexOf("/") == 0? path.substr(1) : path), opt_access, create_path);
+        };
+
+        this.query = function() {
+            //TODO
+            // UNFINISHED
+            //return mod.uri.query(root + (path.indexOf("/") == 0? path.substr(1) : path));
+            return new Promise(function(resolve, reject) {
+                resolve([]);
+            });
         };
 
         this.events = new event.Emitter(this);
@@ -166,6 +179,21 @@ function Config(pkx, module, configuration) {
                 reject(new Error(self.ERROR_INVALID_PATH, "There is no path specified to save the config."));
             }
             else if (!volume) {
+                mountConfigVolume(success, reject);
+            }
+            else {
+                success();
+            }
+        });
+    };
+
+    this.getVolume = function() {
+        return new Promise(function(resolve, reject) {
+            function success() {
+                resolve(volume);
+            }
+
+            if (!volume) {
                 mountConfigVolume(success, reject);
             }
             else {
