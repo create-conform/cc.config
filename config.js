@@ -50,6 +50,8 @@ function Config(pkx, module, configuration) {
         this.readOnly = false;
         this.localId = "config";
 
+        this.then = null;
+
         this.getURI = function(path) {
             return mod.uri.parse(root + (path.indexOf("/") == 0? path.substr(1) : path));
         }
