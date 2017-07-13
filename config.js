@@ -52,25 +52,32 @@ function Config(pkx, module, configuration) {
 
         this.then = null;
 
-        this.getURI = function(path) {
-            return mod.uri.parse(root + (path.indexOf("/") == 0? path.substr(1) : path));
+        this.getURI = function(path, ignoreActiveProfile) {
+            return mod.uri.parse(root + (!ignoreActiveProfile? getProfilePath() : "") + (path.indexOf("/") == 0? path.substr(1) : path));
         }
 
-        this.open = function(path, opt_access, create_path) {
-            return mod.uri.open(root + (path.indexOf("/") == 0? path.substr(1) : path), opt_access, create_path);
+        this.open = function(path, opt_access, create_path, ignoreActiveProfile) {
+            return mod.uri.open(root + (!ignoreActiveProfile? getProfilePath() : "") + (path.indexOf("/") == 0? path.substr(1) : path), opt_access, create_path);
         };
 
-        this.exists = function(path) {
-            return mod.uri.exists(root + (path.indexOf("/") == 0? path.substr(1) : path));
+        this.exists = function(path, ignoreActiveProfile) {
+            return mod.uri.exists(root + (!ignoreActiveProfile? getProfilePath() : "") + (path.indexOf("/") == 0? path.substr(1) : path));
         };
 
-        this.query = function(path) {
-            return mod.uri.query(root + (path.indexOf("/") == 0? path.substr(1) : path));
+        this.query = function(path, ignoreActiveProfile) {
+            return mod.uri.query(root + (!ignoreActiveProfile? getProfilePath() : "") + (path.indexOf("/") == 0? path.substr(1) : path));
         };
 
         this.events = new event.Emitter(this);
     };
     ConfigurationVolume.prototype = io.Volume;
+    var profilePath = "";
+    function getProfilePath() {
+        if (!profilePath && typeof allume !== "undefined" && allume.config) {
+            profilePath = "pkx/" + allume.config.activeProfile + "/";
+        }
+        return profilePath;
+    }
     function mountConfigVolume(resolve, reject) {
         //mount config volume if not already mounted
         if (!volume) {
@@ -204,7 +211,7 @@ function Config(pkx, module, configuration) {
             });
         };
 }
-
+    
 var singleton;
 define(function() {
     if (!singleton) {
