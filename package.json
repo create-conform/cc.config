@@ -1,15 +1,17 @@
 {
   "name": "cc.config",
-  "version": "0.1.15",
+  "version": "0.2.0",
   "title": "Configuration Module",
   "description": "Library for loading and saving configuration data.",
   "license": "Apache-2.0",
-  "main": "config.js",
-  "pkxDependencies": [
-    { "package" : "cc.io.file-system.0.1", "optional" : true},
-    { "package" : "cc.io.local-storage.0.1", "optional" : true},
-    "cc.io.0.1",
-    "cc.host.0.1",
-    "cc.event.0.1"
-  ]
+  "pkx" : {
+    "main": "config.js",
+    "dependencies": [
+      { "package" : "cc.io.file-system.0.2", "optional" : true},
+      { "package" : "cc.io.local-storage.0.2", "optional" : true},
+      "cc.io.0.2",
+      "cc.host.0.2",
+      "cc.event.0.2"
+    ]
+  }
 }
